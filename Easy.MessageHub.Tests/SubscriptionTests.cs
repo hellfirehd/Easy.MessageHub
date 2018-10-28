@@ -1,26 +1,26 @@
-﻿namespace Easy.MessageHub.Tests.Unit
+﻿namespace Easy.MessageHub.Tests
 {
+    using Shouldly;
     using System;
     using System.Threading;
-    using NUnit.Framework;
-    using Shouldly;
+    using System.Threading.Tasks;
+    using Xunit;
 
-    [TestFixture]
-    internal sealed class SubscriptionTests
+    public sealed class SubscriptionTests
     {
-        [Test]
+        [Fact]
         public void When_creating_a_subscription_with_no_throttle()
         {
-            var result = string.Empty;
+            var result = String.Empty;
 
-            var type = typeof(string);
+            var type = typeof(String);
             var token = Guid.NewGuid();
             var throttleBy = TimeSpan.Zero;
-            Action<string> handler = msg => result = msg;
+            Func<String, Task> handler = msg => { result = msg; return Task.CompletedTask; };
 
             var subscription = new Subscription(type, token, throttleBy, handler);
 
-            subscription.Type.ShouldBe(typeof(string));
+            subscription.Type.ShouldBe(typeof(String));
             subscription.Token.ShouldBe(token);
 
             subscription.HandleAsync("Foo");
@@ -30,19 +30,19 @@
             result.ShouldBe("Bar");
         }
 
-        [Test]
+        [Fact]
         public void When_creating_a_subscription_with_throttle()
         {
-            var result = string.Empty;
+            var result = String.Empty;
 
-            var type = typeof(string);
+            var type = typeof(String);
             var token = Guid.NewGuid();
             var throttleBy = TimeSpan.FromMilliseconds(150);
-            Action<string> handler = msg => result = msg;
+            Func<String, Task> handler = msg => { result = msg; return Task.CompletedTask; };
 
             var subscription = new Subscription(type, token, throttleBy, handler);
 
-            subscription.Type.ShouldBe(typeof(string));
+            subscription.Type.ShouldBe(typeof(String));
             subscription.Token.ShouldBe(token);
 
             subscription.HandleAsync("Foo");

@@ -45,7 +45,7 @@
             {
                 while (sw.Elapsed < Duration)
                 {
-                    messageAgg.Publish("Hello there!");
+                    messageAgg.PublishAsync("Hello there!");
                 }
             };
 
@@ -64,7 +64,7 @@
             var sw = Stopwatch.StartNew();
             var tasks = Enumerable.Range(0, 5).Select(n => Task.Run(() =>
             {
-                while (true) { messageAgg.Publish("Hello there!"); }
+                while (true) { messageAgg.PublishAsync("Hello there!"); }
             })).ToArray();
 
             Task.WaitAll(tasks, Duration);
@@ -82,7 +82,7 @@
             var sw = Stopwatch.StartNew();
             while (sw.Elapsed < Duration)
             {
-                messageAgg.Publish("Hello there!");
+                messageAgg.PublishAsync("Hello there!");
             }
 
             Console.WriteLine($"Result is: {result:n0} Time Taken: {sw.Elapsed}");
@@ -104,7 +104,7 @@
             var sw = Stopwatch.StartNew();
             while (sw.Elapsed < Duration)
             {
-                messageAgg.Publish(counter++);
+                messageAgg.PublishAsync(counter++);
             }
 
             Console.WriteLine($"Result is: {result:n0} Time Taken: {sw.Elapsed}");
@@ -129,7 +129,7 @@
             var sw = Stopwatch.StartNew();
             while (sw.Elapsed < Duration)
             {
-                messageAgg.Publish(counter++);
+                messageAgg.PublishAsync(counter++);
                 Thread.Sleep(100);
             }
         }

@@ -2,14 +2,15 @@ namespace Easy.MessageHub
 {
     using System;
     using System.Diagnostics;
+    using System.Threading.Tasks;
 
     internal sealed class Subscription
     {
-        private const long TicksMultiplier = 1000 * TimeSpan.TicksPerMillisecond;
-        private readonly long _throttleByTicks;
-        private double? _lastHandleTimestamp;
+        private const Int64 TicksMultiplier = 1000 * TimeSpan.TicksPerMillisecond;
+        private readonly Int64 _throttleByTicks;
+        private Double? _lastHandleTimestamp;
 
-        internal Subscription(Type type, Guid token, TimeSpan throttleBy, object handler)
+        internal Subscription(Type type, Guid token, TimeSpan throttleBy, Object handler)
         {
             Type = type;
             Token = token;
@@ -17,16 +18,16 @@ namespace Easy.MessageHub
             _throttleByTicks = throttleBy.Ticks;
         }
 
-        internal void Handle<T>(T message)
+        internal Task HandleAsync<T>(T message)
         {
-            if (!CanHandle()) { return; }
+            if (!CanHandle()) { return Task.CompletedTask; }
 
-            var handler = Handler as Action<T>;
-            // ReSharper disable once PossibleNullReferenceException
-            handler(message);
+            var handler = Handler as Func<T, Task>;
+
+            return handler(message);
         }
 
-        internal bool CanHandle()
+        internal Boolean CanHandle()
         {
             if (_throttleByTicks == 0) { return true; }
 
@@ -50,6 +51,6 @@ namespace Easy.MessageHub
 
         internal Guid Token { get; }
         internal Type Type { get; }
-        private object Handler { get; }
+        private Object Handler { get; }
     }
 }

@@ -4,23 +4,24 @@ namespace Easy.MessageHub
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
 
     internal static class Subscriptions
     {
         private static readonly List<Subscription> AllSubscriptions = new List<Subscription>();
-        private static int _subscriptionsChangeCounter;
+        private static Int32 _subscriptionsChangeCounter;
 
         [ThreadStatic]
-        private static int _localSubscriptionRevision;
+        private static Int32 _localSubscriptionRevision;
 
         [ThreadStatic]
         private static Subscription[] _localSubscriptions;
 
-        internal static Guid Register<T>(TimeSpan throttleBy, Action<T> action)
+        internal static Guid Register<T>(TimeSpan throttleBy, Func<T, Task> action)
         {
             var type = typeof(T);
             var key = Guid.NewGuid();
-            var subscription = new Subscription(type, key, throttleBy, action);
+            var subscription = new Subscription(typeof(T), key, throttleBy, action);
 
             lock (AllSubscriptions)
             {
@@ -64,7 +65,7 @@ namespace Easy.MessageHub
             }
         }
 
-        internal static bool IsRegistered(Guid token)
+        internal static Boolean IsRegistered(Guid token)
         {
             lock (AllSubscriptions) { return AllSubscriptions.Any(s => s.Token == token); }
         }
@@ -87,7 +88,7 @@ namespace Easy.MessageHub
             return _localSubscriptions;
         }
 
-        private static T[] RemoveAt<T>(T[] source, int index)
+        private static T[] RemoveAt<T>(T[] source, Int32 index)
         {
             var dest = new T[source.Length - 1];
             if (index > 0) { Array.Copy(source, 0, dest, 0, index); }

@@ -15,31 +15,14 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>net35;netstandard1.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyTitle>Easy MessageHub</AssemblyTitle>
     <AssemblyName>Easy.MessageHub</AssemblyName>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net35' ">
-    <Reference Include="System" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <!-- This is a workaround for: https://github.com/Microsoft/msbuild/issues/1333 -->
-    <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net35'">C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.0' ">
-    <DefineConstants>$(DefineConstants);NET_STANDARD</DefineConstants>
-  </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Easy.MessageHub.v3.ncrunchproject" />
-  </ItemGroup>
 
 </Project>

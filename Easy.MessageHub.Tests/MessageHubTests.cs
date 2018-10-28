@@ -1,21 +1,21 @@
-﻿namespace Easy.MessageHub.Tests.Unit
+﻿namespace Easy.MessageHub.Tests
 {
     using System;
     using System.Collections.Generic;
-    using NUnit.Framework;
+    using System.Threading.Tasks;
     using Shouldly;
+    using Xunit;
 
-    [TestFixture]
     public sealed class MessageHubTests
     {
-        [Test]
-        public void Run()
+        [Fact]
+        public async Task Run()
         {
-            UsageExamples();
-            MessageHubAssertions.Run();
+            await UsageExamples();
+            await MessageHubAssertions.Run();
         }
 
-        private static void UsageExamples()
+        private static async Task UsageExamples()
         {
             var hub = MessageHub.Instance;
 
@@ -33,7 +33,7 @@
             var commandsQueue = new Queue<Command>();
             var ordersQueue = new Queue<Order>();
 
-            void AuditHandler(Type type, object msg)
+            void AuditHandler(Type type, Object msg)
             {
                 // ReSharper disable once AccessToModifiedClosure
                 if (!isUsageExampleRunning) { return; }
@@ -44,7 +44,7 @@
 
             hub.RegisterGlobalHandler(AuditHandler);
 
-            hub.PublishAsync(new MessageBase { Name = "Base" });
+            await hub.PublishAsync(new MessageBase { Name = "Base" });
 
             commandsQueue.ShouldBeEmpty();
             ordersQueue.ShouldBeEmpty();
@@ -54,40 +54,40 @@
 
             allMessagesQueue.ShouldBeEmpty();
 
-            hub.Subscribe<MessageBase>(msg =>
+            hub.Subscribe<MessageBase>(async msg =>
             {
                 msg.ShouldBeAssignableTo<MessageBase>();
                 allMessagesQueue.Enqueue(msg);
             });
 
-            hub.Subscribe<Command>(msg =>
+            hub.Subscribe<Command>(async msg =>
             {
                 msg.ShouldBeAssignableTo<MessageBase>();
                 msg.ShouldBeAssignableTo<Command>();
                 commandsQueue.Enqueue(msg);
             });
 
-            hub.Subscribe<OpenCommand>(msg =>
+            hub.Subscribe<OpenCommand>(async msg =>
             {
                 msg.ShouldBeAssignableTo<Command>();
                 msg.ShouldBeOfType<OpenCommand>();
                 commandsQueue.Enqueue(msg);
             });
 
-            hub.Subscribe<CloseCommand>(msg =>
+            hub.Subscribe<CloseCommand>(async msg =>
             {
                 msg.ShouldBeAssignableTo<Command>();
                 msg.ShouldBeOfType<CloseCommand>(); 
                 commandsQueue.Enqueue(msg);
             });
 
-            hub.Subscribe<Order>(msg =>
+            hub.Subscribe<Order>(async msg =>
             {
                 msg.ShouldBeOfType<Order>();
                 ordersQueue.Enqueue(msg);
             });
 
-            hub.PublishAsync(new Command { Name = "Command" });
+            await hub.PublishAsync(new Command { Name = "Command" });
 
             auditQueue.Count.ShouldBe(1);
             auditQueue.Dequeue().Name.ShouldBe("Command");
@@ -100,7 +100,7 @@
 
             ordersQueue.ShouldBeEmpty();
 
-            hub.PublishAsync(new Order { Name = "Order1" });
+            await hub.PublishAsync(new Order { Name = "Order1" });
 
             auditQueue.Count.ShouldBe(1);
             auditQueue.Dequeue().Name.ShouldBe("Order1");
@@ -113,9 +113,9 @@
             ordersQueue.Count.ShouldBe(1);
             ordersQueue.Dequeue().Name.ShouldBe("Order1");
 
-            hub.Subscribe(new Action<Order>(o => ordersQueue.Enqueue(o)));
+            hub.Subscribe(new Func<Order, Task>(o => { ordersQueue.Enqueue(o); return Task.CompletedTask; }));
 
-            hub.PublishAsync(new Order { Name = "Order2" });
+            await hub.PublishAsync(new Order { Name = "Order2" });
 
             auditQueue.Count.ShouldBe(1);
             auditQueue.Dequeue().Name.ShouldBe("Order2");
@@ -129,7 +129,7 @@
 
             commandsQueue.ShouldBeEmpty();
 
-            hub.PublishAsync(new OpenCommand { Name = "OpenCommand"});
+            await hub.PublishAsync(new OpenCommand { Name = "OpenCommand"});
 
             auditQueue.Count.ShouldBe(1);
             auditQueue.Dequeue().Name.ShouldBe("OpenCommand");
@@ -149,7 +149,7 @@
 
     internal class MessageBase
     {
-        public string Name { get; set; }
+        public String Name { get; set; }
     }
 
     internal class Command : MessageBase {}
